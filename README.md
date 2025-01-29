@@ -18,6 +18,7 @@ Add `export PATH="$PATH:/opt/nvim-linux64/bin"` to .bashrc/.profile/.zshrc
 
 ### Windows Pre Req
 `ripgrep` - Required for telescope.nvim
+* `winget install BurntSushi.ripgrep.MSVC`
 
 ### Styling bash shell
 [Bash Shell](https://phoenixnap.com/kb/change-bash-prompt-linux)
