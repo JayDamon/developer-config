@@ -16,6 +16,9 @@ Add `export PATH="$PATH:/opt/nvim-linux64/bin"` to .bashrc/.profile/.zshrc
 ### Linux Pre Req
 `ripgrep` - Required for telescope.nvim
 
+### Windows Pre Req
+`ripgrep` - Required for telescope.nvim
+
 ### Styling bash shell
 [Bash Shell](https://phoenixnap.com/kb/change-bash-prompt-linux)
 
