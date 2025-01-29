@@ -1,4 +1,5 @@
 # Configuration For New Developer Workspace
+## Neovim
 ### Install Neovim
 #### From Source
 `git clone https://github.com/neovim/neovim.git`
@@ -17,3 +18,11 @@ Add `export PATH="$PATH:/opt/nvim-linux64/bin"` to .bashrc/.profile/.zshrc
 
 ### Styling bash shell
 [Bash Shell](https://phoenixnap.com/kb/change-bash-prompt-linux)
+
+## Intellij
+### Intellij Plugins
+* IdeaVim
+* Fuzzier
+### Configure Intellij
+* Linux - `./intellij-configure.sh`
+* Windows - `./intellij-configure.ps1`
