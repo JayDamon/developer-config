@@ -28,7 +28,7 @@ set nerdtree
 
 " --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
 " Open NERDTree (use q to exit)
-map <leader>x :NERDTreeToggle<CR>
+nnoremap <leader>x :NERDTreeToggle<CR>
 
 " Fuzzier keymappings
 map <Leader>fd <action>(com.mituuz.fuzzier.Fuzzier)
