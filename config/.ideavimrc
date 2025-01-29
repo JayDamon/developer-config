@@ -30,6 +30,11 @@ set nerdtree
 " Open NERDTree (use q to exit)
 map <leader>x :NERDTreeToggle<CR>
 
+" Fuzzier keymappings
+map <Leader>fd <action>(com.mituuz.fuzzier.Fuzzier)
+map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
+map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
+
 " Highlight copied text
 Plug 'machakann/vim-highlightedyank'
 " Commentary plugin
