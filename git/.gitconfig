@@ -1,0 +1,9 @@
+[include]
+    path = ~/.gitconfig-local
+
+[pull]
+    rebase = false
+
+[core]
+    fsmonitor = true
+    untrackedcache = true

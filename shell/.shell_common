@@ -1,0 +1,44 @@
+# Shared shell config — sourced by both .bashrc/.profile and .zshrc
+
+# Environment
+export DEFAULT_USER="$USER"
+
+# Cargo
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+# Dotfiles dir — resolve from this symlinked file
+if [[ -L ~/.shell_common ]]; then
+	DOTFILES_DIR="$(cd "$(dirname "$(readlink ~/.shell_common)")" && cd .. && pwd)"
+fi
+
+# OS-specific PATH
+if [[ "$(uname)" == "Darwin" ]]; then
+	# Homebrew (hardcoded for speed)
+	export HOMEBREW_PREFIX="/opt/homebrew"
+	export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+	export HOMEBREW_REPOSITORY="/opt/homebrew"
+	export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+	export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:"
+	export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+	export PATH="$HOME/Library/Python/3.9/bin:$PATH"
+else
+	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv 2>/dev/null)"
+fi
+
+# PATH
+export PATH="$HOME/dotfiles:$PATH"
+
+# Navigation
+alias nvmsh="nvim $DOTFILES_DIR/shell"
+alias jdot="cd $DOTFILES_DIR"
+alias njdot="nvim $DOTFILES_DIR"
+
+if [[ "$(uname)" == "Darwin" ]]; then
+	# Config shortcuts
+	alias gcnf='nvim ~/Library/Application\ Support/com.mitchellh.ghostty/config'
+	alias aerocnf='nvim ~/.aerospace.toml'
+fi
+
+# Source work or home config if present
+[ -f ~/.shell_work ] && . ~/.shell_work
+[ -f ~/.shell_home ] && . ~/.shell_home

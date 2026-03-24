@@ -1,0 +1,27 @@
+-- local state = {
+--   floating = {
+--     buf = -1,
+--     win = -1,
+--   }
+-- }
+--
+-- local function run_command(opts)
+--   opts = opts or {}
+--   local buf = nil
+--   print(opts.buf)
+--   if vim.api.nvim_buf_is_valid(opts.buf) then
+--     buf = opts.buf
+--   else
+--     buf = vim.api.nvim_create_buf(false, true)
+--   end
+--
+--   local win_conig = {
+--     width = 100,
+--     height = 20,
+--   }
+--
+--   local win = vim.api.nvim_open_win(buf, true, win_config)
+--
+-- end
+--
+-- state.floating = run_command { buf = state.floating.buf }

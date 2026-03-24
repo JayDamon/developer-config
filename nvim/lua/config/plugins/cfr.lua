@@ -1,0 +1,54 @@
+return {
+  -- {
+  --   -- "~/.local/share/cfr/cfr.jar",
+  --   -- dir = os.getenv("HOME") .. "/.local/share/cfr",  -- Use the actual plugin directory
+  --   "dummy/cfr-nvim",
+  --   lazy = true,
+  --   dir = vim.fn.stdpath("config") .. "/lua/config/plugins",  -- Point to existing directory
+  --   build = function()
+  --     -- Set up CFR path
+  --     local home = os.getenv("HOME")
+  --     local cfr_dir = home .. "/.local/share/cfr"
+  --     local cfr_jar = cfr_dir .. "/cfr.jar"
+  --
+  --     if vim.fn.isdirectory(cfr_dir) == 0 then
+  --       vim.fn.mkdir(cfr_dir, "p")
+  --     end
+  --
+  --     -- Ensure CFR is installed
+  --     if not vim.loop.fs_stat(cfr_jar) then
+  --       vim.fn.mkdir(cfr_dir, "p")
+  --       vim.fn.system({
+  --         "curl",
+  --         "-L",
+  --         "-o",
+  --         cfr_jar,
+  --         "https://www.benf.org/other/cfr/cfr-0.152.jar"
+  --       })
+  --     end
+  --   end,
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --   },
+  --   config = function()
+  --     -- Create command for decompilation
+  --     vim.api.nvim_create_user_command("CFRDecompile", function(opts)
+  --       local file = opts.args ~= "" and opts.args or vim.fn.expand("%")
+  --       local cmd = string.format("java -jar %s %s", cfr_jar, file)
+  --
+  --       local output = vim.fn.system(cmd)
+  --
+  --       vim.cmd("new")
+  --       local buf = vim.api.nvim_get_current_buf()
+  --       vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(output, "\n"))
+  --       vim.bo[buf].filetype = "java"
+  --     end, {
+  --       nargs = "?",
+  --       complete = "file"
+  --     })
+  --   end,
+  --   keys = {
+  --     { "<leader>cd", ":CFRDecompile<CR>", desc = "Decompile Java class/jar" },
+  --   },
+  -- }
+}
