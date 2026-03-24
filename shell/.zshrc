@@ -24,8 +24,21 @@ __build_zsh_prompt() {
         fi
         git_part=" %F{${color}}(${branch})%f"
     fi
-    PROMPT="%F{#7aa2f7}%~%f${git_part}
-%F{#a9b1d6}❯%f "
+    # Shorten known paths
+    local cwd="$PWD"
+    if [[ -n "$WORK_WS" && "$cwd" == "$HOME/oncall"* ]]; then
+        cwd="🚨 oc:${cwd#$HOME/oncall}"
+    elif [[ "$cwd" == "$DOTFILES_DIR"* ]]; then
+        cwd="⚙️ jdot:${cwd#$DOTFILES_DIR}"
+    elif [[ -n "$WORK_WS" && "$cwd" == "$WORK_WS"* ]]; then
+        cwd="🏗️ ws:${cwd#$WORK_WS}"
+    elif [[ "$cwd" == "$HOME"* ]]; then
+        cwd="🏠 ~${cwd#$HOME}"
+    fi
+
+    local short_host=$(hostname -s | cut -c1-12)
+    PS1="%B%{[0;38;2;247;118;142m%}[%n@${short_host}]%{[0m%}%B%{[0;38;2;122;162;247m%}[${cwd}]%{[0m%}${git_part}
+%{[38;2;169;177;214m%}❯%{[0m%} "
 }
 precmd() { __build_zsh_prompt }
 setopt PROMPT_SUBST

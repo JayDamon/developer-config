@@ -6,7 +6,7 @@ return {
     {
       "neovim/nvim-lspconfig",
       dependencies = {
-        'seghen/blink.cmp',
+        'saghen/blink.cmp',
         {
           "folke/lazydev.nvim",
           ft = "lua",
@@ -18,33 +18,17 @@ return {
         },
       },
       config = function()
-        local capabilities = require('blink.cmp').get_lsp_capabilities()
-        local lsp_keymaps = require('config.lsp-keymaps')
-        
-        require("lspconfig").lua_ls.setup { capabilities = capabilities }
+	local capabilities = require('blink.cmp').get_lsp_capabilities()
+	local lsp_keymaps = require('config.lsp-keymaps')
 
-        vim.api.nvim_create_autocmd('LspAttach', {
-          callback = function(args)
-            local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if not client then return end
+	vim.api.nvim_create_autocmd('LspAttach', {
+	  callback = function(args)
+	    local client = vim.lsp.get_client_by_id(args.data.client_id)
+	    if not client then return end
 
-            -- Set up common LSP keymaps
-            lsp_keymaps.setup_keymaps(client, args.buf)
-
-            -- I Am not sure if this is doing anything anymore
-            --  It is supposed to provide format on save i believe, but i do that
-            --  via the conform plugin. Neet to figure out which is the best way
-            --  to do things
-            if client.supports_method('textDocument/formatting') then
-              vim.api.nvim_create_autocmd('BufWritePre', {
-                buffer = args.buf,
-                callback = function()
-                  --vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
-                end,
-              })
-            end
-          end,
-        })
+	    lsp_keymaps.setup_keymaps(client, args.buf)
+	  end,
+	})
       end,
     },
     { "williamboman/mason-lspconfig.nvim" },

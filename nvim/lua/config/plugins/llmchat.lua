@@ -2,7 +2,10 @@ return {
   (_G.llm == "copilot") and {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
-      { "github/copilot.vim" },
+      {
+	"github/copilot.vim",
+	version = "v1.34.0",
+      },
       { "nvim-lua/plenary.nvim", branch = "master" },
     },
     opts = {
