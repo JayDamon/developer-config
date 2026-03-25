@@ -62,7 +62,30 @@ fi
 # TOGGLE
 # fi
 
+# Linux-only: add session save/restore plugins
+if [[ "$(uname)" != "Darwin" ]]; then
+  sed -i '/## LINUX_PLUGINS_PLACEHOLDER ##/r /dev/stdin' ~/.tmux.conf << 'PLUGINS'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @resurrect-capture-pane-contents 'on'
+set -g @resurrect-processes 'nvim vim kiro-cli'
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+PLUGINS
+  sed -i '/## LINUX_PLUGINS_PLACEHOLDER ##/d' ~/.tmux.conf
+else
+  sed -i '' '/## LINUX_PLUGINS_PLACEHOLDER ##/d' ~/.tmux.conf
+fi
+
+# Install TPM if not present
+if [ ! -d ~/.tmux/plugins/tpm ]; then
+  echo "Installing TPM..."
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
 ln -sfn "$DOTFILES/nvim" ~/.config/nvim
+mkdir -p ~/.config/tmux
+ln -sf "$DOTFILES/tmux/toggle-pane.sh" ~/.config/tmux/toggle-pane.sh
 ln -sf "$DOTFILES/shell/.shell_common" ~/.shell_common
 ln -sf "$DOTFILES/shell/.bash_profile" ~/.bash_profile
 ln -sf "$DOTFILES/shell/.bashrc" ~/.bashrc
@@ -74,6 +97,7 @@ echo ""
 if [ ! -f ~/.shell_work ] && [ ! -f ~/.shell_home ]; then
   read -rp "Is this a work machine? (y/n): " is_work
   if [[ "$is_work" == "y" ]]; then
+    ln -sf "$DOTFILES/shell/.shell_work_early" ~/.shell_work_early
     ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
   else
     ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
@@ -99,3 +123,10 @@ EOF
 fi
 
 echo "Dotfiles linked. (tmux prefix: $PREFIX)"
+
+# Reload shell config
+if [[ -n "$ZSH_VERSION" ]]; then
+  source ~/.zshrc
+elif [[ -n "$BASH_VERSION" ]]; then
+  source ~/.bashrc
+fi

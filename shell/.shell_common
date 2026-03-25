@@ -1,4 +1,10 @@
 # Shared shell config — sourced by both .bashrc/.profile and .zshrc
+#
+# Load order: .bashrc → .shell_common → (early work/home) → (PATH setup) → (late work/home)
+
+# Source early configs first (PATH-destructive tools like envImprovement)
+[ -f ~/.shell_work_early ] && . ~/.shell_work_early
+[ -f ~/.shell_home_early ] && . ~/.shell_home_early
 
 # Environment
 export DEFAULT_USER="$USER"
@@ -11,7 +17,7 @@ if [[ -L ~/.shell_common ]]; then
 	DOTFILES_DIR="$(cd "$(dirname "$(readlink ~/.shell_common)")" && cd .. && pwd)"
 fi
 
-# OS-specific PATH
+# OS-specific PATH — runs AFTER early configs so nothing wipes these
 if [[ "$(uname)" == "Darwin" ]]; then
 	# Homebrew (hardcoded for speed)
 	export HOMEBREW_PREFIX="/opt/homebrew"
@@ -39,6 +45,6 @@ if [[ "$(uname)" == "Darwin" ]]; then
 	alias aerocnf='nvim ~/.aerospace.toml'
 fi
 
-# Source work or home config if present
+# Source late work or home config (aliases, tools, etc)
 [ -f ~/.shell_work ] && . ~/.shell_work
 [ -f ~/.shell_home ] && . ~/.shell_home

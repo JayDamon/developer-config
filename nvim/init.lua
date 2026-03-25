@@ -8,6 +8,12 @@ vim.g.loaded_python_provider = 0
 vim.g.loaded_python3_provider = 0
 
 vim.g.mapleader = ' '
+
+-- Ensure toolbox is on PATH for :Bemol etc.
+local toolbox = os.getenv('HOME') .. '/.toolbox/bin'
+if not string.find(vim.env.PATH or '', toolbox, 1, true) then
+  vim.env.PATH = toolbox .. ':' .. vim.env.PATH
+end
 vim.g.maplocalleader = ' '
 
 vim.g.have_nerd_font = true
@@ -60,11 +66,18 @@ vim.opt.scrolloff = 10
 -- Ctrl-h/j/k/l now handled by vim-tmux-navigator plugin
 
 vim.keymap.set("n", "<leader><leader>x", "<cmd>source %<CR>")
+vim.keymap.set("n", "<leader><leader>s", "<cmd>source $MYVIMRC<CR>", { desc = "Source nvim config" })
 vim.keymap.set("n", "<leader>x", ":.lua<CR>")
 vim.keymap.set("v", "<leader>x", ":lua<CR>")
 
 vim.keymap.set("n", "<M-j>", "<cmd>cnext<CR>")
 vim.keymap.set("n", "<M-k>", "<cmd>cprev<CR>")
+
+-- Diagnostic navigation
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
+vim.keymap.set("n", "<leader>dd", vim.diagnostic.open_float, { desc = "Diagnostic float" })
+vim.keymap.set("n", "<leader>dq", vim.diagnostic.setloclist, { desc = "Diagnostics to loclist" })
 
 vim.keymap.set("n", "<leader>nt", "<cmd>tabnew<CR>", { desc = 'Open new tab' })
 vim.keymap.set("n", "<leader>ct", "<cmd>tabclose<CR>", { desc = 'Open new tab' })
@@ -84,6 +97,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 require("config.lazy")
+require("config.lsp-commands").setup()
 vim.cmd [[colorscheme tokyonight-night]]
 
 vim.api.nvim_create_autocmd('TermOpen', {

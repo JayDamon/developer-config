@@ -45,7 +45,7 @@ __build_prompt() {
 PROMPT_COMMAND='__build_prompt; history -a'
 
 # Ctrl+L clears screen but preserves scrollback
-bind -x '"\C-l": clear -x'
+[[ $- == *i* ]] && bind -x '"\C-l": clear -x'
 
 # History
 HISTSIZE=1000000

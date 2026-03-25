@@ -44,7 +44,7 @@ return {
       vim.keymap.set("n", "<leader>cp", "<cmd>CopilotChatToggle<cr>", { desc = "Copilot Chat Toggle " })
     end,
   } or nil,
-  (_G.llm == "amazon-q") and {
+  (_G.llm == "amazon-q") and pcall(require, 'amazonq') and {
     require('amazonq').setup({
       -- Command passed to `vim.lsp` to start Q LSP. Amazon -- Q LSP is
       -- a NodeJS program, which must be started with `--stdio` flag.

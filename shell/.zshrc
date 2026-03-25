@@ -37,8 +37,9 @@ __build_zsh_prompt() {
     fi
 
     local short_host=$(hostname -s | cut -c1-12)
-    PS1="%B%{[0;38;2;247;118;142m%}[%n@${short_host}]%{[0m%}%B%{[0;38;2;122;162;247m%}[${cwd}]%{[0m%}${git_part}
-%{[38;2;169;177;214m%}❯%{[0m%} "
+    local esc=$'\e'
+    PS1="%{${esc}[1m%}[%{${esc}[0;38;2;247;118;142m%}%n@${short_host}%{${esc}[0;1m%}]%{${esc}[0m%} %{${esc}[1m%}[%{${esc}[0;38;2;122;162;247m%}${cwd}%{${esc}[0;1m%}]%{${esc}[0m%}${git_part}
+%{${esc}[38;2;169;177;214m%}❯%{${esc}[0m%} "
 }
 precmd() { __build_zsh_prompt }
 setopt PROMPT_SUBST

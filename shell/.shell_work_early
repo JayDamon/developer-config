@@ -1,0 +1,6 @@
+# Work early init — PATH-destructive tools that must run before .shell_common
+# Sourced before .shell_common so linuxbrew/cargo/etc stack on top
+
+if [[ "$(uname)" != "Darwin" ]]; then
+	source /apollo/env/envImprovement/var/bashrc
+fi
