@@ -1,17 +1,24 @@
 -- Read bemol workspace folders for cross-package resolution
 local function get_bemol_folders(root)
   if not root then return {}, {} end
-  local file = io.open(root .. "/.bemol/ws_root_folders")
-  if not file then return {}, {} end
-  local folders, init_folders = {}, {}
-  for line in file:lines() do
-    if vim.fn.isdirectory(line) == 1 then
-      table.insert(folders, line)
-      table.insert(init_folders, "file://" .. line)
+  -- Search up from root to find .bemol/ws_root_folders
+  local dir = root
+  while dir and dir ~= "/" do
+    local file = io.open(dir .. "/.bemol/ws_root_folders")
+    if file then
+      local folders, init_folders = {}, {}
+      for line in file:lines() do
+        if vim.fn.isdirectory(line) == 1 then
+          table.insert(folders, line)
+          table.insert(init_folders, "file://" .. line)
+        end
+      end
+      file:close()
+      return folders, init_folders
     end
+    dir = vim.fn.fnamemodify(dir, ":h")
   end
-  file:close()
-  return folders, init_folders
+  return {}, {}
 end
 
 return {
@@ -43,6 +50,11 @@ return {
         local lsp_commands = require('config.lsp-commands')
         lsp_keymaps.setup_keymaps(client, bufnr)
         lsp_commands.setup()
+
+        -- At work: disable full-document formatting to prevent reformatting untouched code
+        if _G.is_work then
+          client.server_capabilities.documentFormattingProvider = false
+        end
 
         -- jdtls-specific keymaps
         local bufopts = { noremap = true, silent = true, buffer = bufnr }

@@ -9,7 +9,12 @@ return {
           nls.setup({
             sources = {
               -- # FORMATTING #
-              fmt.google_java_format.with({ extra_args = { "--aosp" } }),
+              fmt.google_java_format.with({
+                extra_args = { "--aosp" },
+                condition = function()
+                  return not _G.is_work
+                end,
+              }),
               -- # DIAGNOSTICS #
               dgn.checkstyle.with({
                 extra_args = {

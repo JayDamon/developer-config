@@ -51,13 +51,4 @@ PROMPT_COMMAND='__build_prompt; history -a'
 HISTSIZE=1000000
 HISTFILESIZE=1000000
 
-# Brazil completion (lazy-loaded, work only)
-if command -v brazil &>/dev/null; then
-_brazil_completion_lazy() {
-    unset -f _brazil_completion_lazy
-    complete -r brazil 2>/dev/null
-    [ -f ~/.brazil_completion/bash_completion ] && source ~/.brazil_completion/bash_completion
-    return 124
-}
-complete -F _brazil_completion_lazy brazil
-fi
+

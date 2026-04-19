@@ -8,6 +8,6 @@ else
     last_pane=$(tmux list-panes -F "#{pane_index}" | tail -1)
     tmux break-pane -d -n _hidden_ -s ":.$last_pane"
   else
-    tmux split-window -h -l 40% -c "#{pane_current_path}" "kiro-cli chat --agent simba-default"
+    tmux split-window -h -l 40% -c "#{pane_current_path}" "bash -l -c 'kiro-cli chat --agent simba-default'"
   fi
 fi

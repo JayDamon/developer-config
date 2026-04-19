@@ -32,7 +32,7 @@ else
 fi
 
 # PATH
-export PATH="$HOME/dotfiles:$PATH"
+export PATH="$HOME/.local/bin:$HOME/dotfiles:$PATH"
 
 # Navigation
 alias nvmsh="nvim $DOTFILES_DIR/shell"
