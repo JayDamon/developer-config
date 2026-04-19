@@ -103,10 +103,17 @@ if [ ! -f ~/.shell_work ] && [ ! -f ~/.shell_home ]; then
   else
     ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
   fi
-elif [ -f ~/.shell_work ]; then
-  echo "Work config already linked."
+fi
+
+# Re-link environment configs to keep symlinks current
+if [ -f ~/.shell_work ]; then
+  ln -sf "$DOTFILES/shell/.shell_work_early" ~/.shell_work_early
+  ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
+  [ -d "$DOTFILES/work" ] && { [ -L ~/dotfiles ] || [ ! -e ~/dotfiles ] ; } && ln -sfn "$DOTFILES/work" ~/dotfiles
+  echo "Work config linked."
 elif [ -f ~/.shell_home ]; then
-  echo "Home config already linked."
+  ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
+  echo "Home config linked."
 fi
 
 # First-time git identity setup

@@ -1,4 +1,5 @@
 _G.llm = vim.env.NVIM_LLM or 'copilot'
+_G.is_work = vim.fn.isdirectory("/local/ws") == 1
 
 -- disable language provider support (lua and vimscript plugins only)
 vim.g.loaded_perl_provider = 0
@@ -67,6 +68,41 @@ vim.opt.scrolloff = 10
 
 vim.keymap.set("n", "<leader><leader>x", "<cmd>source %<CR>")
 vim.keymap.set("n", "<leader><leader>s", "<cmd>source $MYVIMRC<CR>", { desc = "Source nvim config" })
+
+-- Brazil build + LSP restart
+vim.keymap.set("n", "<leader>bb", function()
+  -- Find workspace root by searching up for packageInfo
+  local root = vim.fn.findfile("packageInfo", ".;")
+  local cmd
+  if root ~= "" then
+    local pkg_dir = vim.fn.fnamemodify(root, ":h")
+    -- Check if there are sibling packages (multi-package workspace)
+    local ws_root = vim.fn.fnamemodify(pkg_dir, ":h")
+    local siblings = vim.fn.glob(ws_root .. "/*/Config", false, true)
+    if #siblings > 1 then
+      cmd = "cd " .. ws_root .. " && brazil-recursive-cmd --allPackages brazil-build build"
+    else
+      cmd = "cd " .. pkg_dir .. " && brazil-build build"
+    end
+  else
+    cmd = "brazil-build build"
+  end
+  vim.notify("Building: " .. cmd, vim.log.levels.INFO)
+  vim.fn.jobstart(cmd, {
+    on_exit = function(_, code)
+      if code == 0 then
+        vim.schedule(function()
+          vim.notify("Build succeeded, restarting LSP", vim.log.levels.INFO)
+          vim.cmd("LspRestart")
+        end)
+      else
+        vim.schedule(function()
+          vim.notify("Build failed (exit " .. code .. ")", vim.log.levels.ERROR)
+        end)
+      end
+    end,
+  })
+end, { desc = "Brazil build + LSP restart" })
 vim.keymap.set("n", "<leader>x", ":.lua<CR>")
 vim.keymap.set("v", "<leader>x", ":lua<CR>")
 

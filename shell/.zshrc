@@ -71,11 +71,3 @@ zle -N expand-or-complete _lazy_compinit
 # Case-insensitive completion
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
-# Brazil completion (lazy-loaded, work only)
-if (( $+commands[brazil] )); then
-_brazil_completion_lazy() {
-    unfunction _brazil_completion_lazy
-    [ -f ~/.brazil_completion/zsh_completion ] && source ~/.brazil_completion/zsh_completion
-}
-compdef _brazil_completion_lazy brazil
-fi
