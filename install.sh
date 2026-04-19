@@ -84,6 +84,7 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
 fi
 
 ln -sfn "$DOTFILES/nvim" ~/.config/nvim
+ln -sfn "$DOTFILES/foot" ~/.config/foot
 mkdir -p ~/.config/tmux
 ln -sf "$DOTFILES/tmux/toggle-pane.sh" ~/.config/tmux/toggle-pane.sh
 ln -sf "$DOTFILES/shell/.shell_common" ~/.shell_common
