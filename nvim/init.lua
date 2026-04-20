@@ -1,5 +1,7 @@
 _G.llm = vim.env.NVIM_LLM or 'copilot'
-_G.is_work = vim.fn.isdirectory("/local/ws") == 1
+
+-- Machine-local config (written by install.sh)
+pcall(dofile, vim.fn.stdpath("config") .. "/local.lua")
 
 -- disable language provider support (lua and vimscript plugins only)
 vim.g.loaded_perl_provider = 0

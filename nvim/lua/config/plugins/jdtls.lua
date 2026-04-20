@@ -52,7 +52,7 @@ return {
         lsp_commands.setup()
 
         -- At work: disable full-document formatting to prevent reformatting untouched code
-        if _G.is_work then
+        if vim.g.machine == "work" then
           client.server_capabilities.documentFormattingProvider = false
         end
 

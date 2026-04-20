@@ -84,8 +84,6 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
 fi
 
 ln -sfn "$DOTFILES/nvim" ~/.config/nvim
-ln -sfn "$DOTFILES/foot" ~/.config/foot
-ln -sfn "$DOTFILES/hypr" ~/.config/hypr
 mkdir -p ~/.config/tmux
 ln -sf "$DOTFILES/tmux/toggle-pane.sh" ~/.config/tmux/toggle-pane.sh
 ln -sf "$DOTFILES/shell/.shell_common" ~/.shell_common
@@ -112,9 +110,16 @@ if [ -f ~/.shell_work ]; then
   ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
   [ -d "$DOTFILES/work" ] && { [ -L ~/dotfiles ] || [ ! -e ~/dotfiles ] ; } && ln -sfn "$DOTFILES/work" ~/dotfiles
   echo "Work config linked."
+
+  # Neovim machine-local config
+  mkdir -p ~/.config/nvim
+  echo 'vim.g.machine = "work"' > ~/.config/nvim/local.lua
 elif [ -f ~/.shell_home ]; then
   ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
   echo "Home config linked."
+
+  mkdir -p ~/.config/nvim
+  echo 'vim.g.machine = "home"' > ~/.config/nvim/local.lua
 fi
 
 # First-time git identity setup

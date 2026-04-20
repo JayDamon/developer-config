@@ -12,7 +12,7 @@ return {
               fmt.google_java_format.with({
                 extra_args = { "--aosp" },
                 condition = function()
-                  return not _G.is_work
+                  return vim.g.machine ~= "work"
                 end,
               }),
               -- # DIAGNOSTICS #
