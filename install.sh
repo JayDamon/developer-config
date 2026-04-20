@@ -85,6 +85,7 @@ fi
 
 ln -sfn "$DOTFILES/nvim" ~/.config/nvim
 ln -sfn "$DOTFILES/foot" ~/.config/foot
+ln -sfn "$DOTFILES/hypr" ~/.config/hypr
 mkdir -p ~/.config/tmux
 ln -sf "$DOTFILES/tmux/toggle-pane.sh" ~/.config/tmux/toggle-pane.sh
 ln -sf "$DOTFILES/shell/.shell_common" ~/.shell_common
