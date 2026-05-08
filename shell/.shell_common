@@ -38,11 +38,12 @@ export PATH="$HOME/.local/bin:$HOME/dotfiles:$PATH"
 alias nvmsh="nvim $DOTFILES_DIR/shell"
 alias jdot="cd $DOTFILES_DIR"
 alias njdot="nvim $DOTFILES_DIR"
+alias update-all="$DOTFILES_DIR/update-all.sh"
 
 if [[ "$(uname)" == "Darwin" ]]; then
 	# Config shortcuts
-	alias gcfg='nvim ~/Library/Application\ Support/com.mitchellh.ghostty/config'
-	alias aerocfg='nvim ~/.aerospace.toml'
+	alias gcnf='nvim ~/Library/Application\ Support/com.mitchellh.ghostty/config'
+	alias aerocnf='nvim ~/.aerospace.toml'
 fi
 
 # Source late work or home config (aliases, tools, etc)

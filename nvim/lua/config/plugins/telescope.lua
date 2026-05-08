@@ -29,6 +29,9 @@ return {
       vim.keymap.set("n", "<space>fl", require('telescope.builtin').live_grep, { desc = "Live grep" })
       vim.keymap.set("n", "<space>fb", require('telescope.builtin').buffers, { desc = "Find buffers" })
       vim.keymap.set("n", "<space>fs", require('telescope.builtin').lsp_document_symbols, { desc = "Document symbols" })
+      vim.keymap.set("n", "<space>fw", function() 
+	require('telescope.builtin').lsp_dynamic_workspace_symbols({ debounce = 300 })
+      end, { desc = "Workspace symbols" })
       vim.keymap.set("n", "<space>en", function()
         require('telescope.builtin').find_files {
           cwd = vim.fn.stdpath("config")

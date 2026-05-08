@@ -1,8 +1,265 @@
 #!/bin/bash
+# install-software.sh — Install development tools across platforms
+# Supports: macOS (Homebrew), Arch Linux (pacman/yay), Amazon Linux (dnf + manual)
+set -euo pipefail
 
-pacman -Syu
-pacman -S docker docker-compose go jdk17-openjdk --noconfirm
+# Cache sudo credentials upfront (avoids repeated prompts)
+sudo -v
 
-### Configure Docker
-systemctl start docker.service
-usermod -aG docker $USER
+# ─── OS Detection ───────────────────────────────────────────────────────────
+detect_os() {
+  case "$(uname -s)" in
+    Darwin) echo "macos" ;;
+    Linux)
+      if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "$ID" in
+          amzn|amazonlinux) echo "amzn" ;;
+          arch|endeavouros|manjaro) echo "arch" ;;
+          *) echo "unknown-$ID" ;;
+        esac
+      else
+        echo "unknown"
+      fi
+      ;;
+    *) echo "unknown" ;;
+  esac
+}
+
+OS="$(detect_os)"
+echo "Detected OS: $OS"
+
+# ─── Helpers ────────────────────────────────────────────────────────────────
+command_exists() { command -v "$1" &>/dev/null; }
+
+ensure_dir() {
+  mkdir -p "$1"
+  # Add to PATH for this session if not already there
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) export PATH="$1:$PATH" ;;
+  esac
+}
+
+install_from_github_tar() {
+  # $1 = binary name, $2 = tar URL, $3 = path inside tar (optional, defaults to $1)
+  local name="$1" url="$2" bin_path="${3:-$1}"
+  local dest="$HOME/bin"
+  ensure_dir "$dest"
+
+  echo "  Downloading $name..."
+  local tmp
+  tmp="$(mktemp -d)"
+  curl -sL "$url" | tar xz -C "$tmp"
+  mv "$tmp/$bin_path" "$dest/$name"
+  chmod +x "$dest/$name"
+  rm -rf "$tmp"
+  echo "  Installed $name to $dest/$name"
+}
+
+# ─── Package Lists ──────────────────────────────────────────────────────────
+# Tools installed via system package manager
+COMMON_PACKAGES=(
+  neovim
+  tmux
+  ripgrep
+  fd-find
+  fzf
+  jq
+  htop
+  git
+  curl
+  wget
+)
+
+# Tools installed from GitHub releases (when not in package manager)
+# Format: name|repo|version
+GITHUB_TOOLS=(
+  "lazydocker|jesseduffield/lazydocker|0.24.1"
+)
+
+# ─── Platform Installers ────────────────────────────────────────────────────
+install_macos() {
+  if ! command_exists brew; then
+    echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+
+  echo "Installing packages via brew..."
+  # brew uses 'fd' not 'fd-find'
+  local brew_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
+  brew install "${brew_packages[@]}" || true
+
+  # Brew has lazydocker in a tap
+  echo "Installing lazydocker via brew..."
+  brew install jesseduffield/lazydocker/lazydocker || true
+}
+
+install_arch() {
+  echo "Installing packages via pacman..."
+  # Arch uses 'fd' not 'fd-find'
+  local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
+  arch_packages+=(docker docker-compose go jdk17-openjdk)
+  sudo pacman -S --needed --noconfirm "${arch_packages[@]}"
+
+  # Configure Docker
+  echo "Configuring Docker..."
+  sudo systemctl enable --now docker.service
+  if ! groups "$USER" | grep -q docker; then
+    sudo usermod -aG docker "$USER"
+    echo "  Added $USER to docker group (log out and back in to take effect)"
+  fi
+
+  # lazydocker is in AUR
+  if command_exists yay; then
+    echo "Installing AUR packages via yay..."
+    yay -S --needed --noconfirm lazydocker
+  elif command_exists paru; then
+    echo "Installing AUR packages via paru..."
+    paru -S --needed --noconfirm lazydocker
+  else
+    echo "  No AUR helper found (yay/paru). Installing lazydocker from GitHub..."
+    install_github_tools
+  fi
+}
+
+install_amzn() {
+  # AL2 uses yum, AL2023+ uses dnf
+  local pkg_mgr
+  if command_exists dnf; then
+    pkg_mgr="dnf"
+  elif command_exists yum; then
+    pkg_mgr="yum"
+  else
+    echo "ERROR: Neither dnf nor yum found."
+    exit 1
+  fi
+
+  # System packages (available in AL2/AL2023 repos)
+  echo "Installing system packages via $pkg_mgr..."
+  local sys_packages=(tmux jq htop git curl wget)
+  sudo "$pkg_mgr" install -y "${sys_packages[@]}" || true
+
+  # Brew packages (not in yum repos or need newer versions)
+  if command_exists brew; then
+    echo ""
+    echo "Installing packages via brew..."
+    local brew_packages=(neovim ripgrep fzf fd)
+    brew install "${brew_packages[@]}" jesseduffield/lazydocker/lazydocker || true
+  else
+    echo ""
+    echo "  Homebrew is not installed."
+    echo "  The following tools require brew on Amazon Linux: neovim, ripgrep, fzf, fd, lazydocker"
+    echo ""
+    read -rp "  Install what's possible from GitHub, or install Homebrew first? [github/brew]: " choice
+    case "$choice" in
+      brew|homebrew|b)
+        echo ""
+        echo "  ─── Install Homebrew (Linuxbrew) ───────────────────────────"
+        echo ""
+        echo "  Run the following command to install Homebrew:"
+        echo ""
+        echo '    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+        echo ""
+        echo "  After installation, add brew to your PATH:"
+        echo ""
+        echo '    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+        echo ""
+        echo "  Then re-run this script:"
+        echo ""
+        echo "    ./install-software.sh"
+        echo ""
+        echo "  ─────────────────────────────────────────────────────────────"
+        exit 0
+        ;;
+      *)
+        install_github_tools
+        # fd from GitHub
+        if ! command_exists fd && ! command_exists fdfind; then
+          echo "  Installing fd from GitHub..."
+          local arch
+          case "$(uname -m)" in
+            x86_64) arch="x86_64-unknown-linux-gnu" ;;
+            aarch64) arch="aarch64-unknown-linux-gnu" ;;
+            *) echo "  Unsupported arch for fd"; arch="" ;;
+          esac
+          if [[ -n "$arch" ]]; then
+            local fd_ver="10.2.0"
+            local fd_url="https://github.com/sharkdp/fd/releases/download/v${fd_ver}/fd-v${fd_ver}-${arch}.tar.gz"
+            install_from_github_tar "fd" "$fd_url" "fd-v${fd_ver}-${arch}/fd"
+          fi
+        fi
+        ;;
+    esac
+  fi
+}
+
+# ─── GitHub Release Installer ──────────────────────────────────────────────
+install_github_tools() {
+  ensure_dir "$HOME/bin"
+
+  for entry in "${GITHUB_TOOLS[@]}"; do
+    IFS='|' read -r name repo version <<< "$entry"
+
+    if command_exists "$name"; then
+      echo "  $name already installed, skipping."
+      continue
+    fi
+
+    local arch
+    case "$(uname -m)" in
+      x86_64) arch="x86_64" ;;
+      aarch64|arm64) arch="arm64" ;;
+      *) echo "  Unsupported arch for $name"; continue ;;
+    esac
+
+    local os_str
+    case "$(uname -s)" in
+      Linux) os_str="Linux" ;;
+      Darwin) os_str="Darwin" ;;
+    esac
+
+    case "$name" in
+      lazydocker)
+        local url="https://github.com/$repo/releases/download/v${version}/lazydocker_${version}_${os_str}_${arch}.tar.gz"
+        install_from_github_tar "$name" "$url" "lazydocker"
+        ;;
+    esac
+  done
+}
+
+# ─── Main ───────────────────────────────────────────────────────────────────
+echo ""
+echo "═══════════════════════════════════════════"
+echo " Installing development tools ($OS)"
+echo "═══════════════════════════════════════════"
+echo ""
+
+case "$OS" in
+  macos) install_macos ;;
+  arch)  install_arch ;;
+  amzn)  install_amzn ;;
+  *)
+    echo "Unsupported OS: $OS"
+    echo "Supported: macOS, Arch Linux, Amazon Linux"
+    exit 1
+    ;;
+esac
+
+echo ""
+echo "═══════════════════════════════════════════"
+echo " Done! Installed tools:"
+echo "═══════════════════════════════════════════"
+for cmd in neovim tmux rg fd fzf jq lazydocker; do
+  actual="${cmd}"
+  [[ "$cmd" == "neovim" ]] && actual="nvim"
+  if command_exists "$actual"; then
+    printf "  ✓ %-12s %s\n" "$actual" "$(command -v "$actual")"
+  else
+    printf "  ✗ %-12s not found\n" "$actual"
+  fi
+done
+
+echo ""
+echo "Note: Ensure ~/bin is in your PATH. Add to your shell config:"
+echo '  export PATH="$HOME/bin:$PATH"'

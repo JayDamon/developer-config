@@ -11,6 +11,7 @@ return {
   version = "*",
   lazy = true,
   ft = "markdown",
+  enabled = #workspaces > 0,
   dependencies = {
     "nvim-lua/plenary.nvim",
   },
