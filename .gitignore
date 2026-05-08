@@ -2,3 +2,4 @@
 .netrwhist
 shell/.shell_work
 sync-local.sh
+update-from-remote.sh
