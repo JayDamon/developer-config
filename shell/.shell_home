@@ -1,7 +1,7 @@
 # Added by Toolbox App
 export PATH="$PATH:/home/jaydamon/.local/share/JetBrains/Toolbox/scripts"
 
-alias hyprcnf="nvim /home/jaydamon/workplace/developer-config/hypr/hyprland.conf"
+alias hyprcfg="nvim /home/jaydamon/workplace/developer-config/hypr/hyprland.conf"
 
 alias wrk="cd /home/jaydamon/workplace"
 alias ws="cd /home/jaydamon/workplace"
@@ -25,11 +25,11 @@ alias mmusr="cd /home/jaydamon/workplace/moneymaker/user-service"
 alias wrkw="cd /mnt/windows-desktop/Users/jaynd/workplace"
 alias jdw="cd /mnt/windows-desktop/Users/jaynd"
 alias win="cd /mnt/windows-desktop"
-alias ncnf="nvim ~/.config/nvim/init.vim"
+alias ncfg="nvim ~/.config/nvim/init.vim"
 alias nfl="cd /home/jaydamon/workplace/nflpickem"
 alias wine="wine64"
 alias python="python3"
-alias dcnf="cd /home/jaydamon/workplace/developer-config"
+alias dcfg="cd /home/jaydamon/workplace/developer-config"
 alias tb="~/workplace/developer-config/workplaces/budget.sh"
 alias tmm="~/workplace/developer-config/workplaces/moneymaker.sh"
 alias rna='bash ~/workplace/local-scripts/prepend-files.sh'

@@ -41,8 +41,8 @@ alias njdot="nvim $DOTFILES_DIR"
 
 if [[ "$(uname)" == "Darwin" ]]; then
 	# Config shortcuts
-	alias gcnf='nvim ~/Library/Application\ Support/com.mitchellh.ghostty/config'
-	alias aerocnf='nvim ~/.aerospace.toml'
+	alias gcfg='nvim ~/Library/Application\ Support/com.mitchellh.ghostty/config'
+	alias aerocfg='nvim ~/.aerospace.toml'
 fi
 
 # Source late work or home config (aliases, tools, etc)
