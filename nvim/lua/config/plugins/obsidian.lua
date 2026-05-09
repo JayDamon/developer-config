@@ -1,16 +1,23 @@
 local workspaces = {}
+local vaultPath = ""
 
 if vim.g.machine == "work" then
-  table.insert(workspaces, { name = "work", path = "~/Documents/obsidian/AWS" })
+  vaultPath = "~/Documents/obsidian/AWS"
+  table.insert(workspaces, { name = "work", path = vaultPath })
 elseif vim.g.machine == "home" then
-  table.insert(workspaces, { name = "personal", path = "~/Notes/PersonalNotes" })
+  vaultPath = "~/Notes/PersonalNotes"
+  table.insert(workspaces, { name = "personal", path = vaultPath })
 end
 
 return {
   "epwalsh/obsidian.nvim",
   version = "*",
   lazy = true,
-  ft = "markdown",
+
+  event = {
+    "BufReadPre " .. vim.fn.expand(vaultPath),
+  },
+
   enabled = #workspaces > 0,
   dependencies = {
     "nvim-lua/plenary.nvim",

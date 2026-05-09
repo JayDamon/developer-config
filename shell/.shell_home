@@ -1,5 +1,8 @@
 # Added by Toolbox App
 export PATH="$PATH:/home/jaydamon/.local/share/JetBrains/Toolbox/scripts"
+export PATH="$PATH:~/.npm-global/bin"
+export COMMON_PROFILE="HOME"
+[ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 
 alias hyprcfg="nvim /home/jaydamon/workplace/developer-config/hypr/hyprland.conf"
 
@@ -7,6 +10,10 @@ alias wrk="cd /home/jaydamon/workplace"
 alias ws="cd /home/jaydamon/workplace"
 alias mmr="cd /home/jaydamon/workplace/moneymaker/moneymaker-run"
 alias mm="cd /home/jaydamon/workplace/moneymaker" 
+alias mm3m="cd /home/jaydamon/workplace/moneymaker-v3/"
+alias mmv3="cd /home/jaydamon/workplace/moneymaker-v3/moneymaker/"
+alias mmv3c="cd /home/jaydamon/workplace/moneymaker-v3/moneymaker/client/"
+alias mmv3s="cd /home/jaydamon/workplace/moneymaker-v3/moneymaker/server/"
 alias mmals="cd /home/jaydamon/workplace/moneymaker/account-link-service"
 alias mmas="cd /home/jaydamon/workplace/moneymaker/account-service"
 alias mmaus="cd /home/jaydamon/workplace/moneymaker/account-update-service"

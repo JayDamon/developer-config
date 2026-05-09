@@ -3,8 +3,7 @@ return {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
       {
-	"github/copilot.vim",
-	version = "v1.34.0",
+	"copilotlsp-nvim/copilot-lsp",
       },
       { "nvim-lua/plenary.nvim", branch = "master" },
     },

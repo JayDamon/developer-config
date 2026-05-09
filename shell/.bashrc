@@ -52,3 +52,7 @@ HISTSIZE=1000000
 HISTFILESIZE=1000000
 
 
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)

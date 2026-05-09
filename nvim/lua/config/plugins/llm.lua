@@ -1,7 +1,6 @@
 return {
 	(_G.llm == "copilot") and {
-		"github/copilot.vim",
-		version = "v1.34.0",
+		"copilotlsp-nvim/copilot-lsp"
 	} or nil,
 	(_G.llm == "amazon-q") and {
 		name = 'amazonq',

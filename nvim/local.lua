@@ -1,0 +1,1 @@
+vim.g.machine = "home"
