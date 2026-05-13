@@ -99,7 +99,7 @@ install_arch() {
   echo "Installing packages via pacman..."
   # Arch uses 'fd' not 'fd-find'
   local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
-  arch_packages+=(docker docker-compose go jdk17-openjdk kwallet-pam bash-completion tree-sitter-cli unzip)
+  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk kwallet-pam bash-completion tree-sitter-cli unzip)
   sudo pacman -S --needed --noconfirm "${arch_packages[@]}"
 
   # Configure Docker

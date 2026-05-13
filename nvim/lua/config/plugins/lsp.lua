@@ -52,7 +52,7 @@ return {
         "pylsp",
         "dockerls",
         "bashls",
---        "gopls",
+        "gopls",
         "tflint",
       },
       handlers = {
@@ -61,6 +61,22 @@ return {
         --   local lua_opts = lsp.nvim_lua_ls()
         --   require("lspconfig").lua_ls.setup(lua_opts)
         -- end,
+        gopls = function()
+          require("lspconfig").gopls.setup({
+            capabilities = require('blink.cmp').get_lsp_capabilities(),
+            settings = {
+              gopls = {
+                analyses = {
+                  unusedparams = true,
+                  shadow = true,
+                },
+                staticcheck = true,
+                gofumpt = true,
+                usePlaceholders = true,
+              },
+            },
+          })
+        end,
         jdtls = function()
           -- Skip jdtls setup here, handled by nvim-jdtls plugin
         end,

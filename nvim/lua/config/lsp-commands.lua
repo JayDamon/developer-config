@@ -16,6 +16,31 @@ function M.setup()
     print('Refreshing Java projects...')
   end, { desc = 'Refresh Java projects - reload build files and dependencies' })
 
+  vim.api.nvim_create_autocmd('BufWritePre', {
+    pattern = '*.go',
+    callback = function()
+      local clients = vim.lsp.get_clients({ bufnr = 0 })
+      local gopls
+      for _, c in ipairs(clients) do
+        if c.name == 'gopls' then gopls = c break end
+      end
+      if not gopls then return end
+
+      local params = vim.lsp.util.make_range_params(nil, gopls.offset_encoding)
+      params.context = { only = { 'source.organizeImports' }, diagnostics = {} }
+      local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params, 3000)
+      for cid, res in pairs(result or {}) do
+        for _, action in pairs(res.result or {}) do
+          if action.edit then
+            local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or 'utf-16'
+            vim.lsp.util.apply_workspace_edit(action.edit, enc)
+          end
+        end
+      end
+      vim.lsp.buf.format({ async = false, name = 'gopls' })
+    end,
+  })
+
   vim.api.nvim_create_user_command('LspRest', function()
     vim.cmd('LspRestart')
     print('Restarting LSP client...')
