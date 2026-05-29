@@ -1,42 +1,8 @@
-# Added by Toolbox App
-export PATH="$PATH:/home/jaydamon/.local/share/JetBrains/Toolbox/scripts"
-export PATH="$PATH:~/.npm-global/bin"
 export COMMON_PROFILE="HOME"
+
+export PATH="$PATH:$HOME/.local/share/JetBrains/Toolbox/scripts"
+export PATH="$PATH:$HOME/.npm-global/bin"
+
 [ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 
-alias hyprcfg="nvim /home/jaydamon/workplace/developer-config/hypr/hyprland.conf"
-
-alias wrk="cd /home/jaydamon/workplace"
-alias ws="cd /home/jaydamon/workplace"
-alias mmr="cd /home/jaydamon/workplace/moneymaker/moneymaker-run"
-alias mm="cd /home/jaydamon/workplace/moneymaker" 
-alias mm3m="cd /home/jaydamon/workplace/moneymaker-v3/"
-alias mmv3="cd /home/jaydamon/workplace/moneymaker-v3/moneymaker/"
-alias mmv3c="cd /home/jaydamon/workplace/moneymaker-v3/moneymaker/client/"
-alias mmv3s="cd /home/jaydamon/workplace/moneymaker-v3/moneymaker/server/"
-alias mmals="cd /home/jaydamon/workplace/moneymaker/account-link-service"
-alias mmas="cd /home/jaydamon/workplace/moneymaker/account-service"
-alias mmaus="cd /home/jaydamon/workplace/moneymaker/account-update-service"
-alias mmadmin="cd /home/jaydamon/workplace/moneymaker/admin-service"
-alias mmbs="cd /home/jaydamon/workplace/moneymaker/budget-service"
-alias mmhttp="cd /home/jaydamon/workplace/moneymaker/http-toolbox"
-alias mmapi="cd /home/jaydamon/workplace/moneymaker/moneymaker-api-gateway-service"
-alias mmrc="cd /home/jaydamon/workplace/moneymaker/moneymaker-react-client"
-alias mmgc="cd /home/jaydamon/workplace/moneymaker/moneymakergocloak"
-alias mmpld="cd /home/jaydamon/workplace/moneymaker/moneymakerplaid"
-alias mmrbt="cd /home/jaydamon/workplace/moneymaker/moneymakerrabbit"
-alias mmsd="cd /home/jaydamon/workplace/moneymaker/service-discovery"
-alias mmts="cd /home/jaydamon/workplace/moneymaker/transaction-service"
-alias mmtus="cd /home/jaydamon/workplace/moneymaker/transaction-update-service"
-alias mmusr="cd /home/jaydamon/workplace/moneymaker/user-service"
-alias wrkw="cd /mnt/windows-desktop/Users/jaynd/workplace"
-alias jdw="cd /mnt/windows-desktop/Users/jaynd"
-alias win="cd /mnt/windows-desktop"
-alias ncfg="nvim ~/.config/nvim/init.vim"
-alias nfl="cd /home/jaydamon/workplace/nflpickem"
-alias wine="wine64"
-alias python="python3"
-alias dcfg="cd /home/jaydamon/workplace/developer-config"
-alias tb="~/workplace/developer-config/workplaces/budget.sh"
-alias tmm="~/workplace/developer-config/workplaces/moneymaker.sh"
-alias rna='bash ~/workplace/local-scripts/prepend-files.sh'
+[ -f ~/.aliases_home ] && source ~/.aliases_home

@@ -15,8 +15,14 @@ detect_os() {
         . /etc/os-release
         case "$ID" in
           amzn|amazonlinux) echo "amzn" ;;
-          arch|endeavouros|manjaro) echo "arch" ;;
-          *) echo "unknown-$ID" ;;
+          arch|endeavouros|manjaro|cachyos) echo "arch" ;;
+          *)
+            # Fallback: check ID_LIKE for arch-based distros (e.g. future CachyOS variants)
+            case "${ID_LIKE:-}" in
+              *arch*) echo "arch" ;;
+              *) echo "unknown-$ID" ;;
+            esac
+            ;;
         esac
       else
         echo "unknown"
@@ -31,6 +37,8 @@ echo "Detected OS: $OS"
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 command_exists() { command -v "$1" &>/dev/null; }
+
+is_kde() { pacman -Qi plasma-workspace &>/dev/null 2>&1; }
 
 ensure_dir() {
   mkdir -p "$1"
@@ -99,7 +107,13 @@ install_arch() {
   echo "Installing packages via pacman..."
   # Arch uses 'fd' not 'fd-find'
   local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
-  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk kwallet-pam bash-completion tree-sitter-cli unzip)
+  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji)
+
+  if is_kde; then
+    echo "  KDE detected — adding kwallet-pam..."
+    arch_packages+=(kwallet-pam)
+  fi
+
   sudo pacman -S --needed --noconfirm "${arch_packages[@]}"
 
   # Configure Docker

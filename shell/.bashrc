@@ -55,4 +55,4 @@ HISTFILESIZE=1000000
 
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+command -v ng &>/dev/null && source <(ng completion script)

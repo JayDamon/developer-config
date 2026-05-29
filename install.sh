@@ -1,114 +1,103 @@
 #!/bin/bash
-DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+# install.sh — Orchestrates a full system setup.
+# Run with no args for interactive prompts, or pass flags to skip them.
+set -euo pipefail
 
-# Detect OS and set tmux prefix (Ctrl-b for mac, Ctrl-a for linux/remote)
-if [[ "$(uname)" == "Darwin" ]]; then
-  PREFIX="^B"
-else
-  PREFIX="^A"
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Generate tmux config with correct prefix
-rm -f ~/.tmux.conf
-{
-  echo "set -g prefix $PREFIX"
-  echo ""
-  tail -n +2 "$DOTFILES/tmux/.tmux.conf"
-} > ~/.tmux.conf
+# ─── Usage ──────────────────────────────────────────────────────────────────
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
 
-# Option 2 (active): Only add vim-tmux-navigator on linux (inner tmux)
-# Mac uses prefix-based pane switching to avoid conflicts with nested tmux
-if [[ "$(uname)" != "Darwin" ]]; then
-  cat >> ~/.tmux.conf << 'NAVIGATOR'
+  No options   Interactive prompts for each step
+  -s           Install/update system packages  (install-software.sh)
+  -H           Install Hyprland packages        (hyprland-software.sh)
+  -d           Set up dotfile symlinks          (setup-dotfiles.sh)
+  -a           Run all three steps
+  -r           Refresh: auto-detect environment, run everything needed
+  -h           Show this help
 
-# Smart pane switching with awareness of Vim splits (prefix-less)
-is_vim="ps -o state= -o comm= -t '#{pane_tty}' | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|l?n?vim?x?|fzf)(diff)?$'"
-bind-key -n C-h if-shell "$is_vim" 'send-keys C-h' 'select-pane -L'
-bind-key -n C-j if-shell "$is_vim" 'send-keys C-j' 'select-pane -D'
-bind-key -n C-k if-shell "$is_vim" 'send-keys C-k' 'select-pane -U'
-bind-key -n C-l if-shell "$is_vim" 'send-keys C-l' 'select-pane -R'
-NAVIGATOR
-fi
+Examples:
+  ./install.sh          # interactive
+  ./install.sh -a       # install everything
+  ./install.sh -s -d    # packages + dotfiles, skip Hyprland
+  ./install.sh -r       # smart refresh (includes Hyprland only if detected)
+EOF
+}
 
-# Linux-only: add session save/restore plugins
-if [[ "$(uname)" != "Darwin" ]]; then
-  sed -i '/## LINUX_PLUGINS_PLACEHOLDER ##/r /dev/stdin' ~/.tmux.conf << 'PLUGINS'
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'tmux-plugins/tmux-continuum'
-set -g @resurrect-capture-pane-contents 'on'
-set -g @resurrect-processes 'nvim vim kiro-cli'
-set -g @continuum-restore 'on'
-set -g @continuum-save-interval '15'
-PLUGINS
-  sed -i '/## LINUX_PLUGINS_PLACEHOLDER ##/d' ~/.tmux.conf
-else
-  sed -i '' '/## LINUX_PLUGINS_PLACEHOLDER ##/d' ~/.tmux.conf
-fi
+# ─── Flags ──────────────────────────────────────────────────────────────────
+do_software=false
+do_hyprland=false
+do_dotfiles=false
+refresh=false
+interactive=true
 
-# Install TPM if not present
-if [ ! -d ~/.tmux/plugins/tpm ]; then
-  echo "Installing TPM..."
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-fi
+while getopts ":sHdarh" opt; do
+  case "$opt" in
+    s) do_software=true; interactive=false ;;
+    H) do_hyprland=true; interactive=false ;;
+    d) do_dotfiles=true; interactive=false ;;
+    a) do_software=true; do_hyprland=true; do_dotfiles=true; interactive=false ;;
+    r) refresh=true; interactive=false ;;
+    h) usage; exit 0 ;;
+    \?) echo "Unknown option: -$OPTARG"; usage; exit 1 ;;
+  esac
+done
 
-ln -sfn "$DOTFILES/nvim" ~/.config/nvim
-mkdir -p ~/.config/tmux
-ln -sf "$DOTFILES/tmux/toggle-pane.sh" ~/.config/tmux/toggle-pane.sh
-ln -sf "$DOTFILES/shell/.shell_common" ~/.shell_common
-ln -sf "$DOTFILES/shell/.bash_profile" ~/.bash_profile
-ln -sf "$DOTFILES/shell/.bashrc" ~/.bashrc
-ln -sf "$DOTFILES/shell/.zshrc" ~/.zshrc
-ln -sf "$DOTFILES/git/.gitconfig" ~/.gitconfig
+# ─── Hyprland Detection ──────────────────────────────────────────────────────
+hyprland_detected() {
+  # Running as the active session
+  [[ "${XDG_CURRENT_DESKTOP:-}" == "Hyprland" ]] && return 0
+  [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]     && return 0
+  # Installed but not necessarily running (e.g. called from TTY)
+  command -v Hyprland &>/dev/null                 && return 0
+  return 1
+}
 
-# Environment-specific shell config
-echo ""
-if [ ! -f ~/.shell_work ] && [ ! -f ~/.shell_home ]; then
-  read -rp "Is this a work machine? (y/n): " is_work
-  if [[ "$is_work" == "y" ]]; then
-    ln -sf "$DOTFILES/shell/.shell_work_early" ~/.shell_work_early
-    ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
+# ─── Refresh Mode ────────────────────────────────────────────────────────────
+if $refresh; then
+  do_software=true
+  do_dotfiles=true
+  if hyprland_detected; then
+    echo "Hyprland detected — including Hyprland packages."
+    do_hyprland=true
   else
-    ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
+    echo "Hyprland not detected — skipping Hyprland packages."
   fi
 fi
 
-# Re-link environment configs to keep symlinks current
-if [ -f ~/.shell_work ]; then
-  ln -sf "$DOTFILES/shell/.shell_work_early" ~/.shell_work_early
-  ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
-  [ -d "$DOTFILES/work" ] && { [ -L ~/dotfiles ] || [ ! -e ~/dotfiles ] ; } && ln -sfn "$DOTFILES/work" ~/dotfiles
-  echo "Work config linked."
-
-  # Neovim machine-local config
-  mkdir -p ~/.config/nvim
-  echo 'vim.g.machine = "work"' > ~/.config/nvim/local.lua
-elif [ -f ~/.shell_home ]; then
-  ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
-  echo "Home config linked."
-
-  mkdir -p ~/.config/nvim
-  echo 'vim.g.machine = "home"' > ~/.config/nvim/local.lua
-fi
-
-# First-time git identity setup
-if [ ! -f ~/.gitconfig-local ]; then
+# ─── Interactive Prompts ─────────────────────────────────────────────────────
+if $interactive; then
   echo ""
-  echo "No ~/.gitconfig-local found — setting up git identity."
-  read -rp "  Git name: " git_name
-  read -rp "  Git email: " git_email
-  cat > ~/.gitconfig-local <<EOF
-[user]
-    name = $git_name
-    email = $git_email
-EOF
-  echo "  Saved to ~/.gitconfig-local (not tracked by dotfiles)."
+  echo "════════════════════════════════════════════"
+  echo " System Setup"
+  echo "════════════════════════════════════════════"
+  echo ""
+
+  read -rp "Install/update system packages? (y/n): " ans
+  [[ "$ans" == "y" ]] && do_software=true
+
+  read -rp "Install Hyprland packages?       (y/n): " ans
+  [[ "$ans" == "y" ]] && do_hyprland=true
+
+  read -rp "Set up dotfile symlinks?         (y/n): " ans
+  [[ "$ans" == "y" ]] && do_dotfiles=true
+
+  echo ""
 fi
 
-echo "Dotfiles linked. (tmux prefix: $PREFIX)"
-
-# Reload shell config
-if [[ -n "$ZSH_VERSION" ]]; then
-  source ~/.zshrc
-elif [[ -n "$BASH_VERSION" ]]; then
-  source ~/.bashrc
+# ─── Run Steps ───────────────────────────────────────────────────────────────
+if ! $do_software && ! $do_hyprland && ! $do_dotfiles; then
+  echo "Nothing selected. Exiting."
+  exit 0
 fi
+
+$do_software && bash "$SCRIPT_DIR/install-software.sh"
+$do_hyprland && bash "$SCRIPT_DIR/hyprland-software.sh"
+$do_dotfiles && bash "$SCRIPT_DIR/setup-dotfiles.sh"
+
+echo ""
+echo "════════════════════════════════════════════"
+echo " Setup complete."
+echo "════════════════════════════════════════════"
