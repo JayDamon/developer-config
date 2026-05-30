@@ -8,9 +8,13 @@ return {
       require("nvim-treesitter").setup()
 
       -- 2. Explicitly install what you need
-      require("nvim-treesitter").install({
-	"go", "java", "python", "json" -- Core ones like lua/c/markdown are built-in
-      })
+      if vim.g.machine == "server" then
+        require("nvim-treesitter").install({ "bash", "lua" })
+      else
+        require("nvim-treesitter").install({
+          "go", "java", "python", "json" -- Core ones like lua/c/markdown are built-in
+        })
+      end
 
       -- 3. Built-in Keymaps
       -- Neovim 0.12 has native [n, ]n, an, in for selection; 

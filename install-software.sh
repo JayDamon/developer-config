@@ -155,6 +155,7 @@ install_ubuntu() {
     tmux ripgrep fzf jq htop git curl wget unzip
     fd-find build-essential nodejs npm
   )
+  # tree-sitter-cli isn't in Ubuntu apt repos; install via npm after nodejs is present
   echo "Installing packages via apt..."
   sudo apt-get install -y "${packages[@]}"
 
@@ -190,6 +191,14 @@ install_ubuntu() {
     echo "  Added $USER to docker group (log out and back in to take effect)"
   else
     echo "  Docker already installed, skipping."
+  fi
+
+  # tree-sitter-cli — needed by nvim-treesitter to compile parsers
+  if ! command_exists tree-sitter; then
+    echo "Installing tree-sitter-cli via npm..."
+    sudo npm install -g tree-sitter-cli
+  else
+    echo "  tree-sitter-cli already installed, skipping."
   fi
 
   # lazydocker — not in apt, install from GitHub
