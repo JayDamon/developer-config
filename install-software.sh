@@ -103,6 +103,9 @@ install_macos() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
+  echo "Updating Homebrew..."
+  brew update
+
   echo "Installing packages via brew..."
   # brew uses 'fd' not 'fd-find'
   local brew_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
@@ -114,6 +117,9 @@ install_macos() {
 }
 
 install_arch() {
+  echo "Refreshing package databases..."
+  sudo pacman -Syy
+
   echo "Installing packages via pacman..."
   # Arch uses 'fd' not 'fd-find'
   local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")

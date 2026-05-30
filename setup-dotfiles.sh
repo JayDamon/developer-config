@@ -69,6 +69,8 @@ fi
 
 ln -sfn "$DOTFILES/nvim" ~/.config/nvim
 ln -sfn "$DOTFILES/hypr" ~/.config/hypr
+mkdir -p ~/.config/kanshi
+ln -sf "$DOTFILES/hypr/kanshi.conf" ~/.config/kanshi/config
 mkdir -p ~/.config/fish
 ln -sf "$DOTFILES/fish/config.fish" ~/.config/fish/config.fish
 mkdir -p ~/.config/foot
