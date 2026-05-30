@@ -142,13 +142,19 @@ EOF
   echo "  Saved to ~/.gitconfig-local (not tracked by dotfiles)."
 fi
 
-# Bootstrap Neovim — two passes so Mason is installed before its tools are
+# Bootstrap Neovim — two passes so Mason is installed before its tools are.
+# Skip Mason on servers (ensure_installed is empty there anyway, and MasonToolsInstallSync
+# hangs in headless mode with nothing to install).
 if command -v nvim &>/dev/null; then
   echo "Bootstrapping Neovim plugins (this may take a minute)..."
   nvim --headless "+Lazy! sync" +qa 2>&1
 
-  echo "Installing Mason tools (LSPs, formatters — this may take several minutes)..."
-  nvim --headless "+MasonToolsInstallSync" +qa 2>&1
+  if [ ! -f ~/.shell_server ]; then
+    echo "Installing Mason tools (LSPs, formatters — this may take several minutes)..."
+    nvim --headless "+MasonToolsInstallSync" +qa 2>&1
+  else
+    echo "Server machine — skipping Mason tool install."
+  fi
 
   echo "Neovim fully bootstrapped."
 else
