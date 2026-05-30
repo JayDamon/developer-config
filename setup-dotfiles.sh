@@ -163,9 +163,9 @@ fi
 
 echo "Dotfiles linked. (tmux prefix: $PREFIX)"
 
-# Reload shell config
-if [[ -n "$ZSH_VERSION" ]]; then
-  source ~/.zshrc
-elif [[ -n "$BASH_VERSION" ]]; then
-  source ~/.bashrc
-fi
+echo ""
+echo "Reload your shell to pick up the new config:"
+echo "  source ~/.bashrc   (bash)"
+echo "  source ~/.zshrc    (zsh)"
+echo "  exec fish          (fish)"
+echo "Or just open a new terminal."
