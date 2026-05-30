@@ -42,6 +42,14 @@ command_exists() { command -v "$1" &>/dev/null; }
 
 is_kde() { pacman -Qi plasma-workspace &>/dev/null 2>&1; }
 
+# Returns true if nvim is installed AND is >= 0.10
+nvim_is_recent() {
+  command_exists nvim || return 1
+  local minor
+  minor=$(nvim --version 2>/dev/null | head -1 | grep -oE 'v0\.([0-9]+)' | grep -oE '[0-9]+$')
+  [[ "${minor:-0}" -ge 10 ]]
+}
+
 ensure_dir() {
   mkdir -p "$1"
   # Add to PATH for this session if not already there
@@ -150,17 +158,21 @@ install_ubuntu() {
   echo "Installing packages via apt..."
   sudo apt-get install -y "${packages[@]}"
 
-  # Neovim — snap gives latest stable; apt version varies wildly across Ubuntu versions
-  if ! command_exists nvim; then
-    if command_exists snap; then
-      echo "Installing Neovim via snap..."
-      sudo snap install nvim --classic
+  # Neovim — require 0.10+. apt version varies widely so prefer snap.
+  # Handles three cases: not installed, snap-installed but old, apt-installed but old.
+  if nvim_is_recent; then
+    echo "  nvim $(nvim --version | head -1) already installed, skipping."
+  elif command_exists snap; then
+    if snap list nvim &>/dev/null 2>&1; then
+      echo "Refreshing Neovim snap to latest (0.10+ required)..."
+      sudo snap refresh nvim
     else
-      echo "snap not available — installing Neovim via apt (may not be latest)..."
-      sudo apt-get install -y neovim
+      echo "Installing Neovim via snap (0.10+ required)..."
+      sudo snap install nvim --classic
     fi
   else
-    echo "  nvim already installed, skipping."
+    echo "snap not available — installing Neovim via apt (may not be 0.10+, check manually)..."
+    sudo apt-get install -y neovim
   fi
 
   # Docker — official install script is idempotent
