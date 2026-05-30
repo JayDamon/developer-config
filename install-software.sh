@@ -158,21 +158,28 @@ install_ubuntu() {
   echo "Installing packages via apt..."
   sudo apt-get install -y "${packages[@]}"
 
-  # Neovim — require 0.10+. apt version varies widely so prefer snap.
-  # Handles three cases: not installed, snap-installed but old, apt-installed but old.
+  # Neovim — require 0.10+. The snap and apt versions are both outdated on most
+  # Ubuntu releases, so install the pre-compiled binary from GitHub releases instead.
   if nvim_is_recent; then
     echo "  nvim $(nvim --version | head -1) already installed, skipping."
-  elif command_exists snap; then
-    if snap list nvim &>/dev/null 2>&1; then
-      echo "Refreshing Neovim snap to latest (0.10+ required)..."
-      sudo snap refresh nvim
-    else
-      echo "Installing Neovim via snap (0.10+ required)..."
-      sudo snap install nvim --classic
-    fi
   else
-    echo "snap not available — installing Neovim via apt (may not be 0.10+, check manually)..."
-    sudo apt-get install -y neovim
+    local arch
+    case "$(uname -m)" in
+      x86_64)  arch="x86_64" ;;
+      aarch64) arch="arm64" ;;
+      *) echo "  Unsupported arch for nvim binary download."; arch="" ;;
+    esac
+    if [[ -n "$arch" ]]; then
+      echo "Installing Neovim from GitHub releases (0.10+ required)..."
+      local tmp
+      tmp="$(mktemp -d)"
+      curl -sL "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-${arch}.tar.gz" \
+        | tar xz -C "$tmp"
+      sudo rm -rf /opt/nvim
+      sudo mv "$tmp/nvim-linux-${arch}" /opt/nvim
+      sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+      rm -rf "$tmp"
+    fi
   fi
 
   # Docker — official install script is idempotent
