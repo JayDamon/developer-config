@@ -39,7 +39,7 @@ return {
 
     require("mason").setup({})
     require("mason-lspconfig").setup({
-      ensure_installed = {
+      ensure_installed = vim.g.machine ~= "server" and {
         "clangd",
         "ts_ls",
         "eslint",
@@ -54,7 +54,7 @@ return {
         "bashls",
         "gopls",
         "tflint",
-      },
+      } or {},
       handlers = {
         lsp.default_setup,
         -- lua_ls = function()

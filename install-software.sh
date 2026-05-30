@@ -16,10 +16,12 @@ detect_os() {
         case "$ID" in
           amzn|amazonlinux) echo "amzn" ;;
           arch|endeavouros|manjaro|cachyos) echo "arch" ;;
+          ubuntu|debian|linuxmint|pop) echo "ubuntu" ;;
           *)
-            # Fallback: check ID_LIKE for arch-based distros (e.g. future CachyOS variants)
+            # Fallback: check ID_LIKE for arch or debian-based distros
             case "${ID_LIKE:-}" in
-              *arch*) echo "arch" ;;
+              *arch*)   echo "arch" ;;
+              *debian*|*ubuntu*) echo "ubuntu" ;;
               *) echo "unknown-$ID" ;;
             esac
             ;;
@@ -137,6 +139,44 @@ install_arch() {
   fi
 }
 
+install_ubuntu() {
+  echo "Updating apt..."
+  sudo apt-get update -qq
+
+  local packages=(
+    tmux ripgrep fzf jq htop git curl wget unzip
+    fd-find build-essential nodejs npm
+  )
+  echo "Installing packages via apt..."
+  sudo apt-get install -y "${packages[@]}"
+
+  # Neovim — snap gives latest stable; apt version varies wildly across Ubuntu versions
+  if ! command_exists nvim; then
+    if command_exists snap; then
+      echo "Installing Neovim via snap..."
+      sudo snap install nvim --classic
+    else
+      echo "snap not available — installing Neovim via apt (may not be latest)..."
+      sudo apt-get install -y neovim
+    fi
+  else
+    echo "  nvim already installed, skipping."
+  fi
+
+  # Docker — official install script is idempotent
+  if ! command_exists docker; then
+    echo "Installing Docker..."
+    curl -fsSL https://get.docker.com | sh
+    sudo usermod -aG docker "$USER"
+    echo "  Added $USER to docker group (log out and back in to take effect)"
+  else
+    echo "  Docker already installed, skipping."
+  fi
+
+  # lazydocker — not in apt, install from GitHub
+  install_github_tools
+}
+
 install_amzn() {
   # AL2 uses yum, AL2023+ uses dnf
   local pkg_mgr
@@ -250,9 +290,10 @@ echo "════════════════════════�
 echo ""
 
 case "$OS" in
-  macos) install_macos ;;
-  arch)  install_arch ;;
-  amzn)  install_amzn ;;
+  macos)  install_macos ;;
+  arch)   install_arch ;;
+  ubuntu) install_ubuntu ;;
+  amzn)   install_amzn ;;
   *)
     echo "Unsupported OS: $OS"
     echo "Supported: macOS, Arch Linux, Amazon Linux"
@@ -267,6 +308,8 @@ echo "════════════════════════�
 for cmd in neovim tmux rg fd fzf jq lazydocker; do
   actual="${cmd}"
   [[ "$cmd" == "neovim" ]] && actual="nvim"
+  # Ubuntu ships fd as fdfind
+  [[ "$cmd" == "fd" ]] && ! command_exists fd && actual="fdfind"
   if command_exists "$actual"; then
     printf "  ✓ %-12s %s\n" "$actual" "$(command -v "$actual")"
   else

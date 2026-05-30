@@ -18,23 +18,25 @@ return {
     })
 
 
-    mason_tool_installer.setup({
-      ensure_installed = {
-        "clangd",
---        "gopls",
-        "google-java-format",
-        "prettier",
-        "prettierd",
-        "eslint_d",
-        "lua_ls",
-        "jdtls",
-        "yamlfix",
-        "shellcheck",
-        "shfmt",
-        "checkstyle",
---        "delve",
-      }
-    })
+    if vim.g.machine ~= "server" then
+      mason_tool_installer.setup({
+        ensure_installed = {
+          "clangd",
+  --        "gopls",
+          "google-java-format",
+          "prettier",
+          "prettierd",
+          "eslint_d",
+          "lua_ls",
+          "jdtls",
+          "yamlfix",
+          "shellcheck",
+          "shfmt",
+          "checkstyle",
+  --        "delve",
+        }
+      })
+    end
   end,
   build = function()
     pcall(vim.cmd, "MasonUpdate")

@@ -1,12 +1,22 @@
 #!/bin/bash
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 
-# Detect OS and set tmux prefix (Ctrl-b for mac, Ctrl-a for linux/remote)
-if [[ "$(uname)" == "Darwin" ]]; then
-  PREFIX="^B"
-else
-  PREFIX="^A"
+# Tmux prefix — ask once, persist in ~/.tmux_prefix so reruns don't re-prompt.
+# Use Ctrl+A on machines you work on directly, Ctrl+B on machines accessed
+# through an outer tmux session (Mac funnel, remote servers).
+if [ ! -f ~/.tmux_prefix ]; then
+  echo ""
+  echo "Tmux prefix key:"
+  echo "  a) Ctrl+A — this is a primary machine (you work here directly)"
+  echo "  b) Ctrl+B — this is accessed via SSH through another tmux session"
+  read -rp "Select [a/b]: " _prefix_choice
+  if [[ "${_prefix_choice}" == "a" ]]; then
+    echo "^A" > ~/.tmux_prefix
+  else
+    echo "^B" > ~/.tmux_prefix
+  fi
 fi
+PREFIX="$(cat ~/.tmux_prefix)"
 
 # Generate tmux config with correct prefix
 rm -f ~/.tmux.conf
@@ -71,19 +81,29 @@ ln -sf "$DOTFILES/shell/.bashrc" ~/.bashrc
 ln -sf "$DOTFILES/shell/.zshrc" ~/.zshrc
 ln -sf "$DOTFILES/git/.gitconfig" ~/.gitconfig
 
-# Environment-specific shell config
+# Environment-specific shell config — ask once, marker file persists the choice.
 echo ""
-if [ ! -f ~/.shell_work ] && [ ! -f ~/.shell_home ]; then
-  read -rp "Is this a work machine? (y/n): " is_work
-  if [[ "$is_work" == "y" ]]; then
-    ln -sf "$DOTFILES/shell/.shell_work_early" ~/.shell_work_early
-    ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
-    [ -f "$DOTFILES/fish/fish_work.fish" ] && ln -sf "$DOTFILES/fish/fish_work.fish" ~/.fish_work
-  else
-    ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
-    ln -sf "$DOTFILES/shell/aliases_home" ~/.aliases_home
-    ln -sf "$DOTFILES/fish/fish_home.fish" ~/.fish_home
-  fi
+if [ ! -f ~/.shell_work ] && [ ! -f ~/.shell_home ] && [ ! -f ~/.shell_server ]; then
+  echo "Machine type:"
+  echo "  h) Home"
+  echo "  w) Work"
+  echo "  s) Server"
+  read -rp "Select [h/w/s]: " _machine_type
+  case "${_machine_type}" in
+    w|work)
+      ln -sf "$DOTFILES/shell/.shell_work_early" ~/.shell_work_early
+      ln -sf "$DOTFILES/shell/.shell_work" ~/.shell_work
+      [ -f "$DOTFILES/fish/fish_work.fish" ] && ln -sf "$DOTFILES/fish/fish_work.fish" ~/.fish_work
+      ;;
+    s|server)
+      touch ~/.shell_server
+      ;;
+    *)
+      ln -sf "$DOTFILES/shell/.shell_home" ~/.shell_home
+      ln -sf "$DOTFILES/shell/aliases_home" ~/.aliases_home
+      ln -sf "$DOTFILES/fish/fish_home.fish" ~/.fish_home
+      ;;
+  esac
 fi
 
 # Re-link environment configs to keep symlinks current
@@ -93,8 +113,6 @@ if [ -f ~/.shell_work ]; then
   [ -d "$DOTFILES/work" ] && { [ -L ~/dotfiles ] || [ ! -e ~/dotfiles ] ; } && ln -sfn "$DOTFILES/work" ~/dotfiles
   [ -f "$DOTFILES/fish/fish_work.fish" ] && ln -sf "$DOTFILES/fish/fish_work.fish" ~/.fish_work
   echo "Work config linked."
-
-  # Neovim machine-local config
   mkdir -p ~/.config/nvim
   echo 'vim.g.machine = "work"' > ~/.config/nvim/local.lua
 elif [ -f ~/.shell_home ]; then
@@ -102,9 +120,12 @@ elif [ -f ~/.shell_home ]; then
   ln -sf "$DOTFILES/shell/aliases_home" ~/.aliases_home
   ln -sf "$DOTFILES/fish/fish_home.fish" ~/.fish_home
   echo "Home config linked."
-
   mkdir -p ~/.config/nvim
   echo 'vim.g.machine = "home"' > ~/.config/nvim/local.lua
+elif [ -f ~/.shell_server ]; then
+  echo "Server config linked."
+  mkdir -p ~/.config/nvim
+  echo 'vim.g.machine = "server"' > ~/.config/nvim/local.lua
 fi
 
 # First-time git identity setup
