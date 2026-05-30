@@ -22,6 +22,13 @@ if set -q DOTFILES_DIR
     alias nvmsh="nvim $DOTFILES_DIR/shell"
     alias update-all="$DOTFILES_DIR/update-all.sh"
 end
+function ws
+    if set -q WORK_WS
+        cd $WORK_WS
+    else
+        cd $HOME/workplace
+    end
+end
 
 # Machine-specific config (symlinked by install.sh)
 test -f ~/.fish_home && source ~/.fish_home

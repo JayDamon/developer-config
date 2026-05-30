@@ -39,6 +39,7 @@ alias nvmsh="nvim $DOTFILES_DIR/shell"
 alias jdot="cd $DOTFILES_DIR"
 alias njdot="nvim $DOTFILES_DIR"
 alias update-all="$DOTFILES_DIR/update-all.sh"
+alias ws='cd "${WORK_WS:-$HOME/workplace}"'
 
 if [[ "$(uname)" == "Darwin" ]]; then
 	# Config shortcuts
