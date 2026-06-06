@@ -123,7 +123,7 @@ install_arch() {
   echo "Installing packages via pacman..."
   # Arch uses 'fd' not 'fd-find'
   local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
-  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji)
+  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji openrgb liquidctl)
 
   if is_kde; then
     echo "  KDE detected — adding kwallet-pam..."
@@ -139,6 +139,19 @@ install_arch() {
     sudo usermod -aG docker "$USER"
     echo "  Added $USER to docker group (log out and back in to take effect)"
   fi
+
+  # Configure RGB control (OpenRGB for RAM/GPU, liquidctl for AIO cooler)
+  echo "Configuring RGB control..."
+  if ! grep -q "^i2c-dev" /etc/modules-load.d/i2c.conf 2>/dev/null; then
+    echo "i2c-dev" | sudo tee /etc/modules-load.d/i2c.conf > /dev/null
+    echo "  Enabled i2c-dev module on boot"
+  fi
+  sudo modprobe i2c-dev 2>/dev/null || true
+  if ! groups "$USER" | grep -q i2c; then
+    sudo usermod -aG i2c "$USER"
+    echo "  Added $USER to i2c group (log out and back in to take effect)"
+  fi
+  sudo udevadm control --reload-rules && sudo udevadm trigger
 
   # lazydocker is in AUR
   if command_exists yay; then
