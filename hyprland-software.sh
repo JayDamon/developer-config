@@ -120,6 +120,8 @@ flatpak install -y flathub org.videolan.VLC
 # ─── XDG user dirs ───────────────────────────────────────────────────────────
 xdg-user-dirs-update
 
+sudo systemctl enable --now bluetooth
+
 echo ""
 echo "════════════════════════════════════════════"
 echo " Hyprland stack installed."

@@ -123,7 +123,7 @@ install_arch() {
   echo "Installing packages via pacman..."
   # Arch uses 'fd' not 'fd-find'
   local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
-  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji openrgb liquidctl)
+  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji openrgb liquidctl socat sshfs)
 
   if is_kde; then
     echo "  KDE detected — adding kwallet-pam..."
