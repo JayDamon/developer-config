@@ -123,7 +123,7 @@ install_arch() {
   echo "Installing packages via pacman..."
   # Arch uses 'fd' not 'fd-find'
   local arch_packages=("${COMMON_PACKAGES[@]/fd-find/fd}")
-  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji openrgb liquidctl socat sshfs)
+  arch_packages+=(docker docker-compose docker-buildx go jdk17-openjdk bash-completion tree-sitter-cli unzip foot wl-clipboard ttf-jetbrains-mono-nerd noto-fonts-emoji openrgb liquidctl socat sshfs keyd)
 
   if is_kde; then
     echo "  KDE detected — adding kwallet-pam..."
@@ -153,17 +153,14 @@ install_arch() {
   fi
   sudo udevadm control --reload-rules && sudo udevadm trigger
 
-  # lazydocker is in AUR
-  if command_exists yay; then
-    echo "Installing AUR packages via yay..."
-    yay -S --needed --noconfirm lazydocker
-  elif command_exists paru; then
-    echo "Installing AUR packages via paru..."
-    paru -S --needed --noconfirm lazydocker
-  else
-    echo "  No AUR helper found (yay/paru). Installing lazydocker from GitHub..."
-    install_github_tools
-  fi
+  # Configure keyd — CapsLock→Escape on laptop keyboard only (0001:0001 = i8042)
+  echo "Configuring keyd..."
+  sudo mkdir -p /etc/keyd
+  sudo cp "$SCRIPT_DIR/keyd/default.conf" /etc/keyd/default.conf
+  sudo systemctl enable --now keyd
+
+  echo "Installing lazydocker from GitHub..."
+  install_github_tools
 }
 
 install_ubuntu() {

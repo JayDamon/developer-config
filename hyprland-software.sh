@@ -7,30 +7,6 @@ sudo -v
 
 command_exists() { command -v "$1" &>/dev/null; }
 
-# ─── AUR Helper ──────────────────────────────────────────────────────────────
-# Builds and installs yay-bin from AUR if no AUR helper is present.
-# On CachyOS yay ships pre-installed; this handles bare Arch.
-ensure_aur_helper() {
-  if command_exists yay || command_exists paru; then
-    return 0
-  fi
-  echo "No AUR helper found — building yay-bin from AUR..."
-  sudo pacman -S --needed --noconfirm base-devel git
-  local tmp
-  tmp="$(mktemp -d)"
-  git clone https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
-  (cd "$tmp/yay-bin" && makepkg -si --noconfirm)
-  rm -rf "$tmp"
-}
-
-aur_install() {
-  if command_exists yay; then
-    yay -S --needed --noconfirm "$@"
-  elif command_exists paru; then
-    paru -S --needed --noconfirm "$@"
-  fi
-}
-
 # ─── Package Lists ───────────────────────────────────────────────────────────
 # Add new official packages here — rerunning the script picks them up safely.
 PACMAN_PACKAGES=(
@@ -73,15 +49,20 @@ PACMAN_PACKAGES=(
   pipewire
   pipewire-pulse
 
+  # Screenshots
+  hyprshot
+
+  # Power menu (used in keybinds)
+  hyprshutdown
+
+  # Browser
+  brave-bin
+
+  # Bluetooth GUI
+  blueman
+
   # Apps / misc
   flatpak
-)
-
-# Add new AUR packages here — rerunning picks them up safely.
-AUR_PACKAGES=(
-  hyprshot      # screenshot tool (used in keybinds)
-  hyprshutdown  # power menu (used in keybinds)
-  brave-bin     # browser
 )
 
 # ─── Install ─────────────────────────────────────────────────────────────────
@@ -96,11 +77,6 @@ sudo pacman -Syy
 
 echo "Installing official packages via pacman..."
 sudo pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"
-
-ensure_aur_helper
-
-echo "Installing AUR packages..."
-aur_install "${AUR_PACKAGES[@]}"
 
 # ─── SDDM ────────────────────────────────────────────────────────────────────
 if [ -e /etc/systemd/system/display-manager.service ]; then

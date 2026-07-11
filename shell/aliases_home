@@ -2,6 +2,7 @@ alias hyprcfg="nvim $HOME/workplace/developer-config/hypr/hyprland.conf"
 alias hyprkb="nvim $HOME/workplace/developer-config/hypr/modules/keybinds.conf"
 
 alias wks="$HOME/workplace/developer-config/wks.sh"
+alias wbr="$HOME/workplace/developer-config/hypr/scripts/reload-waybar.sh"
 
 alias mmr="cd $HOME/workplace/moneymaker/moneymaker-run"
 alias mm="cd $HOME/workplace/moneymaker"
