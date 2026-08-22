@@ -11,9 +11,9 @@ SESSION="wks"
 # NAMES=(squall cloud biggs wedge)
 # LOCAL_HOSTS=(squall cloud biggs wedge)
 # REMOTE_HOSTS=(squallr cloudr biggsr wedger)
-NAMES=(squall cloud)
-LOCAL_HOSTS=(squall cloud)
-REMOTE_HOSTS=(squallr cloudr)
+NAMES=(squall cloud cid)
+LOCAL_HOSTS=(squall cloud cid)
+REMOTE_HOSTS=(squallr cloudr cidr)
 
 # ─── Flags ───────────────────────────────────────────────────────────────────
 force_remote=false

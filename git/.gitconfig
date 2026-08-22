@@ -7,3 +7,4 @@
 [core]
     fsmonitor = true
     untrackedcache = true
+	editor = nvim

@@ -1,5 +1,6 @@
 alias hyprcfg="nvim $HOME/workplace/developer-config/hypr/hyprland.conf"
 alias hyprkb="nvim $HOME/workplace/developer-config/hypr/modules/keybinds.conf"
+alias obsidian="nvim $HOME/Notes/PersonalNotes/"
 
 alias wks="$HOME/workplace/developer-config/wks.sh"
 alias wbr="$HOME/workplace/developer-config/hypr/scripts/reload-waybar.sh"
