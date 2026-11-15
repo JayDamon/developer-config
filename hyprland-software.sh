@@ -31,7 +31,7 @@ PACMAN_PACKAGES=(
   # Display manager
   sddm
 
-  # Auth + wallet (pam_kwallet_init is exec-once'd in hyprland.conf)
+  # Auth + wallet (pam_kwallet_init is started in hypr/modules/autostart.lua)
   polkit-gnome
   kwallet-pam
 

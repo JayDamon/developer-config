@@ -1,6 +1,6 @@
 #!/bin/bash
 # playgame.sh — Wake gaming PC, ensure Desktop Mode, and launch Moonlight.
-# Mapped to $mainMod SHIFT, F in keybinds.conf.
+# Mapped to $mainMod SHIFT, F in keybinds.lua.
 
 MOONLIGHT_CONF="$HOME/.config/Moonlight Game Streaming Project/Moonlight.conf"
 BAZZITE="gaming"
@@ -63,4 +63,4 @@ done
 # ssh -n $SSH_OPTS $BAZZITE "pgrep steam &>/dev/null || systemd-run --user --no-block -- steam"
 
 moonlight &
-hyprctl dispatch workspace 16
+hyprctl dispatch 'hl.dsp.focus({ workspace = 16 })'

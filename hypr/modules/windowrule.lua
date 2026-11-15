@@ -1,0 +1,44 @@
+--------------------------------
+---- WINDOWS AND WORKSPACES ----
+--------------------------------
+
+-- See https://wiki.hypr.land/configuring/core/rules/
+
+hl.window_rule({
+    -- Ignore maximize requests from all apps. You'll probably like this.
+    name  = "suppress-maximize-events",
+    match = { class = ".*" },
+
+    suppress_event = "maximize",
+})
+
+hl.window_rule({
+    -- Fix some dragging issues with XWayland
+    name  = "fix-xwayland-drags",
+    match = {
+        class      = "^$",
+        title      = "^$",
+        xwayland   = true,
+        float      = true,
+        fullscreen = false,
+        pin        = false,
+    },
+
+    no_focus = true,
+})
+
+hl.window_rule({
+    name  = "move-hyprland-run",
+    match = { class = "hyprland-run" },
+
+    move  = "20 monitor_h-120",
+    float = true,
+})
+
+-- Moonlight — dedicated workspace 16, routed to the primary monitor by workspaces.lua.
+hl.window_rule({
+    name  = "moonlight-gaming",
+    match = { class = [[^(com\.moonlight_stream\.Moonlight|Moonlight)$]] },
+
+    workspace = 16,
+})
