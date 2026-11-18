@@ -15,6 +15,7 @@ Usage: $(basename "$0") [OPTIONS]
   -H           Install Hyprland packages        (hyprland-software.sh)
   -d           Set up dotfile symlinks          (setup-dotfiles.sh)
   -a           Run all three steps
+  -m           Minimal: tmux/git/vim only + tmux config (setup-minimal.sh)
   -r           Refresh: auto-detect environment, run everything needed
   -h           Show this help
 
@@ -23,6 +24,7 @@ Examples:
   ./install.sh -a       # install everything
   ./install.sh -s -d    # packages + dotfiles, skip Hyprland
   ./install.sh -r       # smart refresh (includes Hyprland only if detected)
+  ./install.sh -m       # minimal machine (e.g. Raspberry Pi nodes)
 EOF
 }
 
@@ -31,19 +33,29 @@ do_software=false
 do_hyprland=false
 do_dotfiles=false
 refresh=false
+minimal=false
 interactive=true
 
-while getopts ":sHdarh" opt; do
+while getopts ":sHdarmh" opt; do
   case "$opt" in
     s) do_software=true; interactive=false ;;
     H) do_hyprland=true; interactive=false ;;
     d) do_dotfiles=true; interactive=false ;;
     a) do_software=true; do_hyprland=true; do_dotfiles=true; interactive=false ;;
     r) refresh=true; interactive=false ;;
+    m) minimal=true; interactive=false ;;
     h) usage; exit 0 ;;
     \?) echo "Unknown option: -$OPTARG"; usage; exit 1 ;;
   esac
 done
+
+# ─── Minimal Mode ────────────────────────────────────────────────────────────
+# Standalone: ignores the other steps.
+if $minimal; then
+  bash "$SCRIPT_DIR/install-software.sh" -m
+  bash "$SCRIPT_DIR/setup-minimal.sh"
+  exit 0
+fi
 
 # ─── Hyprland Detection ──────────────────────────────────────────────────────
 hyprland_detected() {

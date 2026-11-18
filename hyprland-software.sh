@@ -3,7 +3,7 @@
 # Idempotent: safe to rerun. pacman/yay --needed skips already-installed packages.
 set -euo pipefail
 
-sudo -v
+sudo -n true 2>/dev/null || sudo -v
 
 command_exists() { command -v "$1" &>/dev/null; }
 
@@ -55,14 +55,18 @@ PACMAN_PACKAGES=(
   # Power menu (used in keybinds)
   hyprshutdown
 
-  # Browser
-  brave-bin
-
   # Bluetooth GUI
   blueman
 
   # Apps / misc
   flatpak
+)
+
+# Packages that are in some repos (e.g. CachyOS) but AUR-only on plain Arch.
+# Installed with pacman when a configured repo has them, otherwise yay/paru.
+AUR_PACKAGES=(
+  # Browser
+  brave-bin
 )
 
 # ─── Install ─────────────────────────────────────────────────────────────────
@@ -77,6 +81,20 @@ sudo pacman -Syy
 
 echo "Installing official packages via pacman..."
 sudo pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"
+
+echo "Installing repo-or-AUR packages..."
+aur_helper=""
+command_exists yay && aur_helper=yay
+[ -z "$aur_helper" ] && command_exists paru && aur_helper=paru
+for pkg in "${AUR_PACKAGES[@]}"; do
+  if pacman -Si "$pkg" &>/dev/null; then
+    sudo pacman -S --needed --noconfirm "$pkg"
+  elif [ -n "$aur_helper" ]; then
+    "$aur_helper" -S --needed --noconfirm "$pkg"
+  else
+    echo "  Warning: $pkg isn't in any configured repo and no AUR helper (yay/paru) is installed — skipping."
+  fi
+done
 
 # ─── SDDM ────────────────────────────────────────────────────────────────────
 if [ -e /etc/systemd/system/display-manager.service ]; then

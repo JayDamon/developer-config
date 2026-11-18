@@ -1,10 +1,21 @@
 #!/bin/bash
 # install-software.sh — Install development tools across platforms
 # Supports: macOS (Homebrew), Arch Linux (pacman/yay), Amazon Linux (dnf + manual)
+#
+# Usage: install-software.sh       — full dev tool install
+#        install-software.sh -m    — minimal: only what's needed for tmux
+#                                    (+ vim), e.g. for Raspberry Pi k8s nodes
 set -euo pipefail
 
-# Cache sudo credentials upfront (avoids repeated prompts)
-sudo -v
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+minimal=false
+[[ "${1:-}" == "-m" ]] && minimal=true
+
+# Cache sudo credentials upfront (avoids repeated prompts). Skip when sudo is
+# already passwordless — `sudo -v` still prompts if any sudoers rule (e.g. the
+# %sudo group) requires a password, even alongside a NOPASSWD rule.
+sudo -n true 2>/dev/null || sudo -v
 
 # ─── OS Detection ───────────────────────────────────────────────────────────
 detect_os() {
@@ -326,7 +337,51 @@ install_github_tools() {
   done
 }
 
+# ─── Minimal Install ────────────────────────────────────────────────────────
+# tmux + git (for TPM plugins) + vim. Nothing else.
+MINIMAL_PACKAGES=(tmux git vim)
+
+install_minimal() {
+  case "$OS" in
+    ubuntu)
+      sudo apt-get update -qq
+      sudo apt-get install -y "${MINIMAL_PACKAGES[@]}"
+      ;;
+    arch)
+      sudo pacman -S --needed --noconfirm "${MINIMAL_PACKAGES[@]}"
+      ;;
+    amzn)
+      if command_exists dnf; then sudo dnf install -y "${MINIMAL_PACKAGES[@]}"
+      else sudo yum install -y "${MINIMAL_PACKAGES[@]}"; fi
+      ;;
+    macos)
+      brew install "${MINIMAL_PACKAGES[@]}" || true
+      ;;
+    *)
+      echo "Unsupported OS: $OS"
+      exit 1
+      ;;
+  esac
+}
+
 # ─── Main ───────────────────────────────────────────────────────────────────
+if $minimal; then
+  echo ""
+  echo "═══════════════════════════════════════════"
+  echo " Minimal install: ${MINIMAL_PACKAGES[*]} ($OS)"
+  echo "═══════════════════════════════════════════"
+  install_minimal
+  echo ""
+  for cmd in "${MINIMAL_PACKAGES[@]}"; do
+    if command_exists "$cmd"; then
+      printf "  ✓ %-6s %s\n" "$cmd" "$(command -v "$cmd")"
+    else
+      printf "  ✗ %-6s not found\n" "$cmd"
+    fi
+  done
+  exit 0
+fi
+
 echo ""
 echo "═══════════════════════════════════════════"
 echo " Installing development tools ($OS)"
